@@ -1,10 +1,5 @@
-<table width="100%" border="1">
-    <tr>
-        <td align="center" style="background-color:#000;color:#fff;font: bolder 20px tahoma,arial">MAPS.JS</td>
-    </tr>
-</table>
-
-_Maps.js_ est une librairie permettant de manipuler google maps. 
+#Maps.js 
+est une librairie permettant de manipuler google maps. 
 
 Une démo est disponible sur le site : [site de demo](http://map.getinit.fr/).
 
