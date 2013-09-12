@@ -37,7 +37,7 @@ Je continue de faire évoluer la librairie.
 
 Une référence API sera disponible dès que possible. 
 
-Si vous  avez des questions, des remontées, des projets (pouvant inclure maps.js ou pas), contactez moi via  <rsenatus@free.fr>.
+Si vous  avez des questions, des remontées, des projets (pouvant inclure maps.js ou pas), contactez moi via  <contact@getinit.fr>.
 
 Je vous répondrai avec plaisir.
 
