@@ -12,7 +12,7 @@
 * les requêtes que vous avez effectuées avec cette clé                    *
 * vous incombent.                                                         *
 *                                                                         *
-* contact : contact@getinit.fr, rsenatus@free.fr                          *
+* contact : contact@getinit.fr                                            *
 **************************************************************************/
 //
 // PREAMBULE
@@ -77,24 +77,29 @@ function getInit_HandleMap(){
 // Avant de démarrer la map, nous devons définir 10 variables.
 // Rassurez-vous les 10 sont optionnelles.
 //
-// Nous allons les aborder dans l'ordre que je vous conseille de les créer.
+// Nous les numerotons et  les abordons dans l'ordre que je vous conseille de les créer.
 //
 // 1: [ styleMicro ]
 // 2: [ styleMacro ]
 // un "style" est une représentation visuelle de la map.
-// par exemple je veux que la mer sur la map soit "vert" et je ne veux pas afficher le nom des routes, etc...
+// par exemple je veux que la mer sur la map soit "jaune" et je ne veux pas afficher le nom des routes, etc...
 // maps.js dispose de deux "styles" visuels prédéfinis. un micro et un macro.
 // La valeur par défaut de chacun est un style que j'ai prédéfini.
+// Vous pouvez les changer ou les "reset/annuler". 
+//
+// Il est possible de définir le styleMicro ET/OU le styleMacro 
+// OU d'annuler l'un des deux styles. 
+// Ou d'annuler les deux styles prédéfinis. 
 //
 // Pourquoi deux styles visuels ?
 // A une certaine distance (donc de zoom) ce n'est pas forcément nécessaire d'afficher certains détails sur la map.
-// Il est possible alors de déterminer avec les options qui vont suivre quand changer de style visuel. On passe donc
-// de styleMacro a styleMicro.
-// Il est possible de définir le styleMicro ET/OU le styleMacro OU aucun des deux styles.
+// Il est possible alors de déterminer avec "zoomLevelToSwapMapStyle" (option 9) quand changer de style visuel. 
+// A un certain zoom, on passera donc du styleMacro au styleMicro.
 //
 // REMARQUE:
 // a) si: styleMicro = styleMacro;  dans ce cas pas de changement de style
-// b) si: styleMicro = [""] ou styleMacro = [""]; le visuel de la map sera le visuel par défaut défini par Google.
+// b) si: styleMicro = ["whatEverNotDefine"] ou styleMacro = [""]; le visuel de la map sera le visuel par défaut 
+// défini par Google.
 //
 // 3: [ center ]
 // Ce paramètre est la position de la map au démarrage. Elle est aussi la position par défaut de la map.
@@ -104,8 +109,8 @@ function getInit_HandleMap(){
 // Niveau de zoom au démarrage de la map. Elle est aussi le niveau de zoom par défaut. Sa valeur par défaut est 7. 
 //
 // REMARQUE:
-// la notion de "position par défaut" et "zoom par défaut" sera explicitée plus bas. Pour le moment, c'est juste intéressant
-// de les noter. 
+// la notion de "position par défaut" et "zoom par défaut" sera explicitée plus bas. Pour le moment, 
+// c'est juste intéressant de les noter. On y reviendra. 
 //
 // 5: [ panControl ]
 // 6: [ zoomControl ]
@@ -114,10 +119,10 @@ function getInit_HandleMap(){
 // Affiche ou pas les contrôles standards de google maps. Leur valeur par défaut est false. 
 //
 // 9: [zoomLevelToSwapMapStyle]
-// Niveau de changement du style visuel. La valeur par défaut est 5 (zoom 5). 
+// Niveau de zoom ou on passe de styleMacro a styleMicro. La valeur par défaut est 5 (zoom 5). 
 //
 // 10: [mapOptions]
-// Objet dont les membres sont les options précédemment citées. 
+// Objet dont les membres/propriétes sont les variables (1-9) précédemment citées. 
 //
 // 
 //
@@ -187,7 +192,8 @@ function getInit_HandleMap(){
 
 
 // REMARQUE : var map = new Map("map_canvas") suffit largement.
-// Pretez attention a l'id de la DIV. Un conflit de nom peut surgir. 
+// Pretez attention a l'id de la DIV. Un conflit de nom peut surgir avec les variables utilisés par google maps. 
+// "map_canvas" est un bon choix. 
 //
 //**************************************************************************
 //
@@ -195,7 +201,7 @@ function getInit_HandleMap(){
 //
 //**************************************************************************
 //
-// Ts les "Event" définis dans la docs google.maps.event sont disponibles.
+// Ts les "Event" définis dans la docs "google maps api v3"/google.maps.event sont disponibles.
 // Dans notre cas on attend que la map ait fini de loader pour continuer le programme.
 // Le callback retourne un objet event nommé ici "e" (mais qu'on utilise pas). 
   map.handleMapEvent('tilesloaded', function(e){
@@ -204,9 +210,14 @@ function getInit_HandleMap(){
   
 
 // On passe un tableau d'objet à la méthode addMarker de notre objet map.
-// map nous retourne le MÊME tableau MAIS avec un nouveau membre "m" pour chaque objet.
-// "m" référence chaque Marker créer.
-// Exemple arrDepart sera retourné avec un objet "m" pour chaque ligne (exemple : arrDepart[0].m). 
+// - Si le tableau dispose du couple {lat: xx.xxxx, lng: yy.yyyy}, alors le marker est positione selon les 
+// coordonnes lat/lng. 
+// - Si le tableau ne dispose pas du couple  {lat: xx.xxxx, lng: yy.yyyy} la fonction addMarker fait une 
+// demande de geolocalisation en fonction du membre/propriete : "xlocation". 
+// exemple [{xlocation: "adresse a determiner la position"}].
+// En fin de traitement, la méthode "addMarker" nous retourne le MÊME tableau MAIS avec un nouveau 
+// membre/propriété "m" pour chaque objet. "m" est la référence Marker pour chaque objet.
+// Exemple : la ligne 0 de arrDepart aura une réference marker = arrDepart[0].m. 
   function continueWithMarker() { 
     map.addMarker(arrMonde, function(arrMondeWithMarker){
       
@@ -246,18 +257,25 @@ function getInit_HandleMap(){
             // setTitle est une méthode propre aux markers de google maps.
             m.setTitle(arrMonde[i].societe);
             
-            // On utilise le namespace google.maps.event pour attacher un listener sur chaque marker.
+            // On utilise le namespace google.maps.event pour attacher un listener sur chaque marker de chaque ligne
+            // du tableau.
             google.maps.event.addListener(m,'click',function(e){
-                // Pour le click nous allons utiliser la méthode goTo de notre objet map.
+                // L'orsqu'on clique sur un marker on se positionne dessus et on zoom.
+                // Nous allons utiliser la méthode goTo([destination]) de notre objet map pour cela.
                 //
                 // Elle prend 3 paramètres :
                 //
-                // 1: [ DESTINATION ]: un string (ex : map.goTo("paris")) OU un objet (Ex : map.goTo({lat: xx.xxx, lng: yy.yyyy}).
+                // 1: [ DESTINATION ]: un string (ex : map.goTo("paris")) OU un objet 
+                // (Ex : map.goTo({lat: xx.xxx, lng: yy.yyyy}).
                 //
                 // REMARQUE :
-                // La destination est optionnelle. Dans ce cas on se positionne sur les coordonnées lat, lng d'initialisation. 
+                // "destination" est optionnelle. 
+                // Si on fait simplement un map.goTo() Dans ce cas on se positionne sur les 
+                // coordonnées lat, lng d'initialisation. La position "center" (option d'initialisation 3) initiale 
+                // est la position par défaut de la map. 
                 // 
-                // 2: [ ZOOM ]: le niveau de zoom que l'on souhaite. Dans le cas contraire le zoom initial est utilisé.
+                // 2: [ ZOOM ]: le niveau de zoom que l'on souhaite. 
+                // Dans le cas contraire le "defZoom" (option d'initialisation 4) est utilisé.
                 //
                 // 3: [ CALLBACK ]: une fonction callback. Pour le moment on ne va pas l'utiliser.
                 //
@@ -279,12 +297,13 @@ function getInit_HandleMap(){
 // Pour résumer, chaque fois que vous cliquez sur un
 // des 3 select de la page web une fonction correspondante est appelée. 
 //
-// Si c'etait le select continent, la map se place sur le continent en question. 
-// Si c'etait le select pays, la map se positionne sur le pays.
-// si c'etait le select ville, la map se positionne sur la ville.
+// Si on click sur le select "continent", la map se place sur le continent en question. 
+// Si on click sur le select "pays", la map se positionne sur le pays.
+// si on click sur le select "ville", la map se positionne sur la ville.
 //
 // POur le positionnement de la map sur un continent 
-// nous utilisons un autre array.
+// nous utilisons un autre array/tableau. Cela nous permet juste d'avoir plus de flexibilité sur 
+// l'affichage. On aurait pu faire un map.goTo("europe"); 
 //
  
   function handleSelectEvent() {
@@ -347,6 +366,14 @@ function getInit_HandleMap(){
 // Lorsque vous utilisez un tableau d'objet pour générer les markers
 // 1 - soit tous les objets disposent des membres "lat" et "lng" (ex: [{lat : xx.xxx, lng: yy.yyyy}])
 // 2 - soit l'objet dispose de la propriété "xlocation" (ex: [{xlocation: "string adresse à géolocaliser"}])
+// Le positionnement du marker utilise l'un ou l'autre. La prédominance va a lat/lng. 
+// 
+// le tableau est de la forme : 
+// [
+// {lat: xx.xxxxxx, lng: yy.yyyy, marker: '/path/name.ext', markerOver: '/path/name.ext'},
+// {xlocation: "adresse/lieu a geolocaliser"}, 
+// {lat: xx.xxxxxx, lng: yy.yyyy}
+// ]
 // 
 
 //**************************************************************************
@@ -372,9 +399,13 @@ function getInit_HandleMap(){
 //
 //**************************************************************************
 //
-// map.handleMapEvent('tilesloaded', callback(e))
+// Pour notre demonstration, nous avons utilisé 3 méthodes uniquement : 
+//
+// map.handleMapEvent('Event', callback(e))
 // map.addMarker(arrXLocationOULatLng, callback(arrXLocationOULatLngWithMarkerReference))
-// map.goTo()
+// map.goTo("strDestination ou {lat/lng}", intZoom, callback(e))
+//
+// 
 
 //**************************************************************************
 //
