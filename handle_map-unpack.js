@@ -210,11 +210,13 @@ function getInit_HandleMap(){
   
 
 // On passe un tableau d'objet à la méthode addMarker de notre objet map.
+//
 // - Si le tableau dispose du couple {lat: xx.xxxx, lng: yy.yyyy}, alors le marker est positione selon les 
 // coordonnes lat/lng. 
-// - Si le tableau ne dispose pas du couple  {lat: xx.xxxx, lng: yy.yyyy} la fonction addMarker fait une 
-// demande de geolocalisation en fonction du membre/propriete : "xlocation". 
+// - Si le tableau ne dispose pas du couple  {lat: xx.xxxx, lng: yy.yyyy} la methode addMarker fait une 
+// demande de geolocalisation en fonction du membre/propriete : "xlocation" dans le tableau passé. 
 // exemple [{xlocation: "adresse a determiner la position"}].
+//
 // En fin de traitement, la méthode "addMarker" nous retourne le MÊME tableau MAIS avec un nouveau 
 // membre/propriété "m" pour chaque objet. "m" est la référence Marker pour chaque objet.
 // Exemple : la ligne 0 de arrDepart aura une réference marker = arrDepart[0].m. 
