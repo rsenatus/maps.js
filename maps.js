@@ -1,5 +1,5 @@
 ﻿/**************************************************************************
-* name : maps.js V1.0                                        *
+* name : maps.js V1.0.1                                        *
 * Cett oeuvre est mise à disposition selon les termes de la Licence       *
 * Creative Commons Attribution 3 (BY NC SA) - Pas d’utilisation           *
 * commerciale - Partage dans les mêmes conditions 3.0 France.             *
@@ -180,13 +180,25 @@ function Map(containerID, options){
               checkLatLng(); 
             }
             
-            function addDefaultEventHandlerOnMarker(marker) {
+            function addDefaultEventHandlerOnMarker(marker, fixe, over) {
               google.maps.event.addListener(marker, 'mouseover', function() {
-                this.setIcon(icon2);
+                  if (fixe == undefined){
+                    msg("marker 1 is undefined. On utilise le marker par défault");
+                    marker.setIcon(icon1);
+                  }else{
+                    msg("marker 1 is defined. On utilise le marker du tableau :"+ fixe);
+                    marker.setIcon(fixe);
+                  }                
               });
                     
               google.maps.event.addListener(marker, 'mouseout', function() {
-                this.setIcon(icon1);
+                  if (over == undefined){
+                    msg("marker 2 is undefined. On utilise le marker par défault");
+                    marker.setIcon(icon2);
+                  }else{
+                    msg("marker 2 is defined. On utilise le marker du tableau :"+ over);
+                    marker.setIcon(over);
+                  }                
               });
             }
             
@@ -200,20 +212,20 @@ function Map(containerID, options){
                           position: location,
                           map: map
                         });
-                    //determinons quel marker icon utilisé.
-                    for (var propertie in arrObjMarker[i]) {
-                      switch (propertie) {
-                        case "marker":
-                            icon1 = arrObjMarker[i][propertie];
-                          break;
-                        case "markerOver":
-                            icon2 = arrObjMarker[i][propertie]; 
-                          break; 
+                    
+                      //determinons si la propriete marker est present dans l'objet pour cette position.
+                      //Dans le cas ou il est present on utilise ce marker. 
+                      for (var propertie in arrObjMarker[i]) {
+                        switch (propertie) {
+                          case "marker":
+                              var src = arrObjMarker[i][propertie];
+                              if(src.length > 0) icon1 = arrObjMarker[i][propertie];
+                            break;
+                        }
                       }
-                    }
                     
                     m.setIcon(icon1);
-                    addDefaultEventHandlerOnMarker(m); 
+                    addDefaultEventHandlerOnMarker(m, arrObjMarker[i].marker, arrObjMarker[i].markerOver); 
                     
                     msg("item: "        +i
                         +" lat : "      +parseFloat(arrObjMarker[i].lat)
@@ -224,6 +236,7 @@ function Map(containerID, options){
                     
                     arrObjMarker[i].m = m; 
                   }
+                  
                 if (typeof callback == "function") callback (arrObjMarker);
             }    
         
