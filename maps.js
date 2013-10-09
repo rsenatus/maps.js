@@ -24,7 +24,7 @@ function Map(containerID, options){
   var map = new Object();
   var zoomLevelToSwapMapStyle = 7; 
   var defZoom = 7;
-  var maxZoom = 16;
+  var maxZoom = 18;
   var mDebug = false;
   var mapOptions = new Object(); 
   var styleMacro = [
@@ -88,6 +88,19 @@ function Map(containerID, options){
     }
   ];
 
+    this.getMap = function(){ return map; }; 
+    
+    this.getInfoWindow = function(content){
+      var infowindow = new google.maps.InfoWindow();
+      if(content) infowindow.setContent(content); 
+      return infowindow; 
+    }
+  
+    this.getGoogleLatLng = function(objLatLng){ getGoogleLatLng(objLatLng); };
+    function getGoogleLatLng(objLatLng){
+      return new google.maps.LatLng(objLatLng.lat, objLatLng.lng); 
+    }
+  
     this.goTo = function (varData, zoom, callback){ goTo(varData, zoom, callback);}; 
     function goTo(varData, zoom, callback){
       var objLatLng = new Object();
@@ -137,6 +150,10 @@ function Map(containerID, options){
     
     this.setZoom = function(nbrZoomVal){
         if(nbrZoomVal <= maxZoom) map.setZoom(nbrZoomVal); 
+    }
+    
+    this.getZoom = function(){
+      return map.getZoom(); 
     }
  
     this.handleMapEvent = function(event, callback){ handleMapEvent(event, callback); }; 
@@ -267,6 +284,45 @@ function Map(containerID, options){
         if (typeof arrObjMarker != "object") msg("map.addMarker : not an array object");
         else main();             
     }
+    
+    
+    this.geolocation = function(sCallback, eCallback){ geolocation(sCallback, eCallback); };
+    function geolocation(sCallback, eCallback){
+      var locMarker; 
+
+      var successCallback = function(position){
+        var pos  = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+          if (locMarker == undefined){
+            locMarker = new google.maps.Marker({
+                map: map
+            })
+          }
+          
+        locMarker.setPosition(pos); 
+        msg(position.coords.latitude+" "+position.coords.longitude);
+      }
+      
+      var errorCallback = function(error){
+        switch(error.code){
+          case error.PERMISSION_DENIED:
+            msg("L'accès à la géollocalisation est réfusé.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            msg("L'emplacement de l'utilisateur n'a pas pu être déterminé");
+            break;
+          case error.TIMEOUT:
+            msg("Le service n'a pas répondu à temps");
+            break;
+        };
+      };
+      
+        if(!navigator.geolocation){ alert("La géolocalisation n'est pas prise en compte");
+        }else{          
+          if (typeof sCallback == "function")  successCallback = sCallback ;
+          if (typeof eCallback == "function")  errorCallback = eCallback ;  
+          navigator.geolocation.watchPosition(successCallback, errorCallback, {enableHighAccuracy : true, timeout:80000, maximumAge:900000});
+        };
+    }
         
     function msg(strMsg, obj){
       if (mDebug) console.log("debug : "+ strMsg);
@@ -280,11 +336,7 @@ function Map(containerID, options){
     function removeMapEvent(event) {
       google.maps.event.removeListener(map, event);
     }
-    
-    function getGoogleLatLng(objLatLng){
-      return new google.maps.LatLng(objLatLng.lat, objLatLng.lng); 
-    }
-    
+        
     function setMapStyle(){
       if(map.getZoom() < zoomLevelToSwapMapStyle){
         map.setMapTypeId('Macro');
